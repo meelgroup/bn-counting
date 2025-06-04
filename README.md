@@ -1,3 +1,5 @@
+## Tool and Benchmark of Scalable Counting of Minimal Trap Spaces and Fixed Points in Boolean Networks
+
 # Content
 - `approxasp`: ApproxASP binary
 - `ganak`: GANAK and ApproxMC binary
