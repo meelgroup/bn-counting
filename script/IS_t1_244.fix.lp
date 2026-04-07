@@ -1,0 +1,1 @@
+c ind nv_BCR nv_ETS1 nv_Gzmb nv_IL23 nv_B9 nv_IL12R nv_IL18R nv_IL4R nv_IL7R nv_AP1 nv_IL7 nv_TCR nv_IL12 nv_IL27 nv_IL15 nv_Notch1 nv_IL21 0
