@@ -30,13 +30,18 @@ Run Approxasp for `t1_244.fix.lp` with independent support `IS_t1_244.fix.lp`
 ```
 ./approxasp --conf 0.35 --sparse --useind IS_t1_244.fix.lp --asp t1_244.fix.lp
 ```
-The command runs approxasp for `tolerance = 0.8` and `confidence = 0.2`
+The command runs approxasp for $\epsilon = 0.8$ and $\delta = 0.2$
 
 ## Preprocessing BNs
 We used [tsconj](https://github.com/daemontus/tsconj) and [fASP](https://github.com/giang-trinh/fASP) to process BNs to ASP program, for minimal trap space and fixed points, respectively. 
 
+- [tsconj](https://github.com/daemontus/tsconj), related paper: [AAAI2024](https://ojs.aaai.org/index.php/AAAI/article/view/28943)
+- [fASP](https://github.com/giang-trinh/fASP), related paper: [CP2023](https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2023.35)
+
+Note: for _only_ fixed points counting, some recently published work is [here](https://www.ijcai.org/proceedings/2025/290)
+
 ## Benchmark:
-Benchmark of our CP2025 experiment is available at [https://zenodo.org/records/15141045](https://zenodo.org/records/15141045). 
+The benchmark of our CP2025 experiments is available at [https://zenodo.org/records/15141045](https://zenodo.org/records/15141045). 
 
 
 ## How to cite
@@ -49,3 +54,9 @@ If you use it, please cite our work:
   year={2025}
 }
 ```
+
+## Contributors
+- [Mohimenul Kabir](https://mahi045.github.io/)
+- [Van-Giang Trinh](https://dblp.org/pid/152/4760.html)
+- [Samuel Pastva](https://dblp.org/pid/167/4487.html)
+- [Kuldeep S Meel](https://scs.gatech.edu/people/kuldeep-s-meel)
