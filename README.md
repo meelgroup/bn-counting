@@ -11,9 +11,13 @@ git clone --recurse-submodules git@github.com:meelgroup/bn-counting.git
 ### Dependencies
 You need to install cmake, g++, re2c, and bison.
 ```
-sudo apt-get install bison
-sudo apt-get install re2c
-sudo apt install build-essential cmake
+sudo apt install build-essential bison re2c cmake gringo python3-pip
+```
+
+Install python packages
+```
+pip install networkx
+pip install clingo
 ```
 
 ### ASP Counter: ApproxASP
@@ -44,7 +48,7 @@ We used [tsconj](https://github.com/daemontus/tsconj) and [fASP](https://github.
 
 
 ## Benchmark:
-The benchmark of our CP2025 experiments is available at [https://zenodo.org/records/19473442](https://zenodo.org/records/19473442). 
+The benchmark of our CP2025 experiments is available at [https://zenodo.org/records/19609732](https://zenodo.org/records/19609732). 
 
 
 ## How to cite
