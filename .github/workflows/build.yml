@@ -1,0 +1,41 @@
+
+name: CI Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Install libraries
+        run: sudo apt-get update && sudo apt-get install -y build-essential cmake bison re2c gringo clasp python3-pip
+
+      - name: Install networkx
+        run: |
+          pip install networkx
+          pip install clingo
+
+      - name: Run build
+        run: |
+          chmod +x build.sh
+          ./build.sh
+          
+      - name: Sample Run 1
+        run: |
+          cd script
+          python run_counting_bn.py -i t1_244.mts.lp
+
+      - name: Sample Run 2
+        run: |
+          cd script
+          python run_counting_bn.py -i t1_244.mts.lp

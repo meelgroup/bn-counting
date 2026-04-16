@@ -17,20 +17,24 @@ sudo apt install build-essential cmake
 ```
 
 ### ASP Counter: ApproxASP
-We used [ApproxASP](https://github.com/meelgroup/ApproxASP) as the underlying ASP counter. It is added as a submodule. 
-
-## Compile ApproxASP
-First you need to compile ApproxASP. cd to ApproxASP and see the readme present in `ApproxASP` directory to compile ApproxASP. After sucessful compilation, mv approxasp binary to `script` directory.
+Compile approxasp:
+```
+chmod +x build.sh
+./build.sh
+```
 
     
 ## Run ApproxASP
-cd to script. It has necessary input BN files.
+cd to scripts: `cd scripts`
+run on `t1_244.fix.lp` as follows:
+```
+python run_counting_bn.py -i t1_244.fix.lp
+```
 
-Run Approxasp for `t1_244.fix.lp` with independent support `IS_t1_244.fix.lp`
+run on `t1_244.mts.lp` as follows:
 ```
-./approxasp --conf 0.35 --sparse --useind IS_t1_244.fix.lp --asp t1_244.fix.lp
+python run_counting_bn.py -i t1_244.mts.lp
 ```
-The command runs approxasp for $\epsilon = 0.8$ and $\delta = 0.2$
 
 ## Preprocessing BNs
 We used [tsconj](https://github.com/daemontus/tsconj) and [fASP](https://github.com/giang-trinh/fASP) to process BNs to ASP program, for minimal trap space and fixed points, respectively. 
@@ -38,10 +42,9 @@ We used [tsconj](https://github.com/daemontus/tsconj) and [fASP](https://github.
 - [tsconj](https://github.com/daemontus/tsconj), related paper: [AAAI2024](https://ojs.aaai.org/index.php/AAAI/article/view/28943)
 - [fASP](https://github.com/giang-trinh/fASP), related paper: [CP2023](https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2023.35)
 
-Note: for _only_ fixed points counting, some recently published work is [here](https://www.ijcai.org/proceedings/2025/290)
 
 ## Benchmark:
-The benchmark of our CP2025 experiments is available at [https://zenodo.org/records/15141045](https://zenodo.org/records/15141045). 
+The benchmark of our CP2025 experiments is available at [https://zenodo.org/records/19473442](https://zenodo.org/records/19473442). 
 
 
 ## How to cite
