@@ -1,4 +1,4 @@
-import os, argparse, tempfile
+import os, argparse, tempfile, shutil
 import subprocess as sp
 parser = argparse.ArgumentParser()
 parser.add_argument('-i','--i', help='input ASP file', required=True)
@@ -25,6 +25,13 @@ with tempfile.NamedTemporaryFile(dir=".", delete=False) as f:
     temp_file = f.name
     os.system("cp {0} {1}".format(args.i, temp_file))
     input_file = os.path.basename(temp_file)
+
+if shutil.which("gringo"):
+    # print("Gringo Installed")
+    pass
+else:
+    print("gringo is not installed. Please install gringo")
+    exit(1)
 
 os.system('gringo {0} > grounded_{0}'.format(input_file))
 cnt_time = 3600

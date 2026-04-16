@@ -33,9 +33,11 @@ jobs:
       - name: Sample Run 1
         run: |
           cd script
-          python run_counting_bn.py -i t1_244.mts.lp
+          python run_counting_bn.py -i t1_244.mts.lp | tee /tmp/out.txt
+          grep -q "bn-counting:" /tmp/out.txt
 
       - name: Sample Run 2
         run: |
           cd script
-          python run_counting_bn.py -i t1_244.mts.lp
+          python run_counting_bn.py -i t1_244.fix.lp  | tee /tmp/out.txt
+          grep -q "bn-counting:" /tmp/out.txt
