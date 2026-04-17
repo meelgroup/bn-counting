@@ -29,7 +29,8 @@ chmod +x build.sh
 
     
 ## Run ApproxASP
-cd to scripts: `cd scripts`
+First cd to scripts: `cd scripts`
+
 run on `t1_244.fix.lp` as follows:
 ```
 python run_counting_bn.py -i t1_244.fix.lp
