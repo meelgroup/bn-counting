@@ -91,7 +91,7 @@ We used [tsconj](https://github.com/daemontus/tsconj) and [fASP](https://github.
 
 
 ## Benchmark:
-The benchmark of our CP2025 experiments is available at [https://zenodo.org/records/19609732](https://zenodo.org/records/19609732). 
+The benchmark of our CP2025 experiments is available at [https://zenodo.org/records/19641424](https://zenodo.org/records/19641424). 
 
 
 ## How to cite
