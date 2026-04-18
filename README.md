@@ -1,6 +1,8 @@
-# Tool and Benchmark of Scalable Counting of Minimal Trap Spaces and Fixed Points in Boolean Networks
+# Tool of Scalable Counting of Minimal Trap Spaces and Fixed Points in Boolean Networks
 
-The repository has the benchmark and tools of our [CP2025](https://drops.dagstuhl.de/storage/00lipics/lipics-vol340-cp2025/LIPIcs.CP.2025.17/LIPIcs.CP.2025.17.pdf) paper. 
+The repository is the tool of our [CP2025](https://drops.dagstuhl.de/storage/00lipics/lipics-vol340-cp2025/LIPIcs.CP.2025.17/LIPIcs.CP.2025.17.pdf) paper. 
+
+The tool counts the number of minimal trap spaces and fixed points of a Boolean network. The detailed can be found here: [CP2025](https://drops.dagstuhl.de/storage/00lipics/lipics-vol340-cp2025/LIPIcs.CP.2025.17/LIPIcs.CP.2025.17.pdf).
 
 
 ### Clone the repo
@@ -11,7 +13,7 @@ git clone --recurse-submodules git@github.com:meelgroup/bn-counting.git
 ### Dependencies
 You need to install cmake, g++, re2c, and bison.
 ```
-sudo apt install build-essential bison re2c cmake gringo python3-pip
+sudo apt install build-essential bison re2c cmake gringo clasp python3-pip
 ```
 
 Install python packages
@@ -20,8 +22,8 @@ pip install networkx
 pip install clingo
 ```
 
-### ASP Counter: ApproxASP
-Compile approxasp:
+### Compilation and install
+You need to compile approxasp and install python package `fASP` and `tsconj`. The following command to do that:
 ```
 chmod +x build.sh
 ./build.sh
@@ -29,12 +31,12 @@ chmod +x build.sh
 
     
 ## Run ApproxASP
-First cd to scripts: `cd scripts`
+First cd to script: `cd script`
 
 
 ### Running first task
 `Input`: 
-- `Boolean network`: a Boolean network (.bnet file)
+- `Boolean Network`: a Boolean network (.bnet file)
 
 For counting minimal trap spaces:
 ```
@@ -84,7 +86,7 @@ python3 run_fixed_point.py -t 3 -bn t1_244.bnet -phen phen_244.txt -pert pert_24
 it should print the count in line: `C-FIX-3:`
 
 ## Preprocessing BNs
-We used [tsconj](https://github.com/daemontus/tsconj) and [fASP](https://github.com/giang-trinh/fASP) to process BNs to ASP program, for minimal trap space and fixed points, respectively. 
+We used [tsconj](https://github.com/daemontus/tsconj) and [fASP](https://github.com/giang-trinh/fASP) to process BNs to ASP program, for minimal trap space and fixed points, respectively. The original implementation is modified for our usage. 
 
 
 ## Benchmark:
