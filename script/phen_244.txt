@@ -1,0 +1,3 @@
+v_PDK1 1
+v_NFkB 0
+v_STAT4 0
