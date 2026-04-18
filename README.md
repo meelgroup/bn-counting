@@ -20,6 +20,7 @@ Install python packages
 ```
 pip install networkx
 pip install clingo
+pip install biodivine-aeon
 ```
 
 ### Compilation and install

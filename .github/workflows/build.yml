@@ -24,6 +24,7 @@ jobs:
         run: |
           pip install networkx
           pip install clingo
+          pip install biodivine-aeon
 
       - name: Check installation
         run: |
