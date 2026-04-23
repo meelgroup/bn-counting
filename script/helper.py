@@ -3,7 +3,7 @@ import subprocess as sp
 
 
 def run(cmd, timeout, ttl = 3, silent = False):
-    proc = sp.Popen([cmd], stdout=sp.PIPE, stderr=sp.PIPE, shell=True)
+    proc = sp.Popen([cmd], stdout=sp.PIPE, stderr=sp.PIPE, check=True, text=True)
     # print(cmd)
     try:
         (out, err) = proc.communicate(timeout = int(timeout * 1.1) + 1)

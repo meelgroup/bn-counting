@@ -7,7 +7,7 @@ The tool counts the number of minimal trap spaces and fixed points of a Boolean 
 
 ### Clone the repo
 ```
-git clone --recurse-submodules git@github.com:meelgroup/bn-counting.git
+git clone --recurse-submodules https://github.com/meelgroup/bn-counting.git
 ```
 
 ### Dependencies
@@ -31,11 +31,11 @@ chmod +x build.sh
 ```
 
     
-## Run ApproxASP
+## Run
 First cd to script: `cd script`
 
 
-### Running first task
+### Running first task: C-MTS-1 and C-FIX-1
 `Input`: 
 - `Boolean Network`: a Boolean network (.bnet file)
 
@@ -51,7 +51,7 @@ python3 run_fixed_point.py -t 1 -bn t1_244.bnet
 ```
 it should print the count in line: `C-FIX-1:`
 
-### Running second task
+### Running second task: C-MTS-2 and C-FIX-2
 `Input`: 
 - `Boolean network`: a Boolean network (.bnet file)
 - `phenotype`: a phenotype, we specify it in a file. You can see example in file `phen_244.txt`
@@ -68,7 +68,7 @@ python3 run_fixed_point.py -t 2 -bn t1_244.bnet -phen phen_244.txt
 ```
 it should print the count in line: `C-FIX-2:`
 
-### Running third task
+### Running third task: C-MTS-3 and C-FIX-3
 `Input`: 
 - `Boolean network`: a Boolean network (.bnet file)
 - `phenotype`: a phenotype, we specify it in a file. You can see example in file `phen_244.txt`
@@ -87,7 +87,7 @@ python3 run_fixed_point.py -t 3 -bn t1_244.bnet -phen phen_244.txt -pert pert_24
 it should print the count in line: `C-FIX-3:`
 
 ## Preprocessing BNs
-We used [tsconj](https://github.com/daemontus/tsconj) and [fASP](https://github.com/giang-trinh/fASP) to process BNs to ASP program, for minimal trap space and fixed points, respectively. The original implementation is modified for our usage. 
+We used [tsconj](https://github.com/daemontus/tsconj) and [fASP](https://github.com/giang-trinh/fASP) to encode BNs to ASP program, for minimal trap space and fixed points, respectively. The original implementation is modified for our usage. 
 
 
 ## Benchmark:

@@ -7,7 +7,7 @@ echo "Building ApproxASP..."
 cd "$ROOT_DIR/ApproxASP"
 mkdir -p build && cd build
 cmake -DCLINGO_BUILD_SHARED=ON ..
-make -j12
+make -j$(nproc)
 cp approxasp "$ROOT_DIR/script"
 
 echo "Done. Copied binaries to:"

@@ -13,7 +13,6 @@ parser.add_argument('-t','--t', help='task (e.g., 1 or 2 or 3)', default=1, requ
 # First, prepare ASP programs for all "normal" networks without any special requirements.
 
 
-file_path = "t1_244.bnet"
 
 def preprocess_bn(bn_path):
     # preprocess BN
