@@ -35,7 +35,7 @@ def preprocess_bn(bn_path):
 
 def first_task(bn_path):
     fASP.compute_fix_points(
-        file_path, 
+        bn_path, 
         display=False,
         max_output=1,         
         method="conj",
