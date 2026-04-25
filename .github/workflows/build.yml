@@ -43,12 +43,11 @@ jobs:
           
       - name: Sample Run minimal trap space
         run: |
-          cd script
-          python run_minimal_trap_space.py -t 1 -bn t1_244.bnet | tee /tmp/out.txt
+          python3 script/run_minimal_trap_space.py -t 1 -bn script/t1_244.bnet | tee /tmp/out.txt
           grep -q "C-MTS-1" /tmp/out.txt
-          python run_minimal_trap_space.py -t 2 -bn t1_244.bnet -phen phen_244.txt | tee /tmp/out.txt
+          python3 script/run_minimal_trap_space.py -t 2 -bn script/t1_244.bnet -phen script/phen_244.txt | tee /tmp/out.txt
           grep -q "C-MTS-2" /tmp/out.txt
-          python run_minimal_trap_space.py -t 3 -bn t1_244.bnet -phen phen_244.txt -pert pert_244.txt | tee /tmp/out.txt
+          python3 script/run_minimal_trap_space.py -t 3 -bn script/t1_244.bnet -phen script/phen_244.txt -pert script/pert_244.txt | tee /tmp/out.txt
           grep -q "C-MTS-3" /tmp/out.txt
 
       - name: Sample Run fixed point

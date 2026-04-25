@@ -1,6 +1,8 @@
 import os, random, tsconj, argparse, tempfile
 from biodivine_aeon import *
 from pathlib import Path
+import shutil
+from contextlib import contextmanager
 from helper import parse_perturbation_variables, parse_phenotype, run_approxasp
 
 parser = argparse.ArgumentParser()
@@ -9,10 +11,20 @@ parser.add_argument('-phen','--phen', help='phenotype', required=False)
 parser.add_argument('-pert','--pert', help='perturbation', required=False)
 parser.add_argument('-t','--t', help='task (e.g., 1 or 2 or 3)', default=1, required=False)
 
+@contextmanager
+def pushd(path):
+    old_cwd = Path.cwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(old_cwd)
 
 
 def first_task(bn_path):
-    file_path = f"{bn_path}"
+    bn_path = Path(bn_path).resolve()
+
+    file_path = str(bn_path)
     bn = BooleanNetwork.from_file(file_path)
     
     # Once we remove irrelevant regulations, some models become disconnected
@@ -27,22 +39,34 @@ def first_task(bn_path):
         # Replace the previous network file (otherwise it will not be used by tsconj)
         Path(file_path).write_text(bn.to_bnet())
 
-    print(f"[{file_path}] Loaded {bn}.")
+    print(f"[{bn_path.name}] Loaded {bn}.")
 
-    spaces = list(tsconj.compute_trap_spaces(
-        file_path, 
-        max_output=1, 
-        method="conj", 
-        computation="min",
-        write_asp_file=True,
-    ))
-    assert len(spaces) == 1
-    # the query file should be written
-    os.replace("query.lp", f"{bn_path.replace('.bnet', '.t1.mts.lp')}")
+    with pushd(bn_path.parent):
+        spaces = list(
+            tsconj.compute_trap_spaces(
+                str(bn_path),
+                max_output=1,
+                method="conj",
+                computation="min",
+                write_asp_file=True,
+            )
+        )
+
+        assert len(spaces) == 1
+
+        query_file = bn_path.parent / "query.lp"
+        out_file = bn_path.with_suffix(".t1.mts.lp")
+
+        if not query_file.exists():
+            raise FileNotFoundError(f"Expected file was not created: {query_file}")
+
+        os.replace(query_file, out_file)
 
 
 def second_task(bn_path, phenotype):
-    bn = BooleanNetwork.from_file(bn_path)
+    bn_path = Path(bn_path).resolve()
+
+    bn = BooleanNetwork.from_file(str(bn_path))
     
     # Once we remove irrelevant regulations, some models become disconnected
     # and these unused variables are then problematic in further steps.
@@ -54,7 +78,7 @@ def second_task(bn_path, phenotype):
         print(f"[{bn_path}] Removing variables {to_remove} since they are not connected to the rest of the graph (Weak components: {[len(x) for x in wcc]}).")
         bn = bn.drop(to_remove)
         # Replace the previous network file (otherwise it will not be used by tsconj)
-        Path(bn_path).write_text(bn.to_bnet())
+        bn_path.write_text(bn.to_bnet(), encoding="utf-8")
 
     # print(f"[{bn_path}] Loaded {bn}.")
 
@@ -65,7 +89,9 @@ def second_task(bn_path, phenotype):
     # Save the network with the phenotype annotation, embedding the size of the phenotype into the filename.
     # model_str = f"{str(annotation)}\n{bn_path.to_aeon()}"
     # Path(f'{bn_path.replace(".bnet", f".phen-{PHENOTYPE_SIZE}.aeon")}').write_text(model_str)
-    Path(f'{bn_path.replace(".bnet", f".phen-{PHENOTYPE_SIZE}.bnet")}').write_text(bn.to_bnet())
+    # Path(f'{bn_path.replace(".bnet", f".phen-{PHENOTYPE_SIZE}.bnet")}').write_text(bn.to_bnet())
+    phen_bn = bn_path.with_name(f"{bn_path.stem}.phen-{PHENOTYPE_SIZE}.bnet")
+    phen_bn.write_text(bn.to_bnet(), encoding="utf-8")
     # print(f"[{bn_path}] Saved a network with phenotype annotation.")
 
     # file_path = f"{INPUT_PHENOTYPE_FOLDER}/{file}"
@@ -81,16 +107,23 @@ def second_task(bn_path, phenotype):
             asp_commands.append(f":- n{var}.")
 
     # Merge ASP commands into a single string.
-    asp_suffix = "\n".join(asp_commands)
+    # asp_suffix = "\n".join(asp_commands)
 
     # Append ASP commands to the ASP file.
-    base_asp_file = bn_path.replace(f".bnet", ".t1.mts.lp") # first task must be done
-    query = Path(f"{base_asp_file}").read_text()
-    query = f"{query}\n{asp_suffix}"
-    Path(bn_path.replace(".bnet", ".t2.mts.lp")).write_text(query)
+    # base_asp_file = bn_path.replace(f".bnet", ".t1.mts.lp") # first task must be done
+    # query = Path(f"{base_asp_file}").read_text()
+    # query = f"{query}\n{asp_suffix}"
+    # Path(bn_path.replace(".bnet", ".t2.mts.lp")).write_text(query)
+    base_asp_file = bn_path.with_suffix(".t1.mts.lp")
+    query = base_asp_file.read_text(encoding="utf-8")
+    query = f"{query}\n" + "\n".join(asp_commands)
+
+    out_file = bn_path.with_suffix(".t2.mts.lp")
+    out_file.write_text(query, encoding="utf-8")
 
 def third_task(bn_path, phenotype, perturbable):
-    bn = BooleanNetwork.from_file(bn_path)
+    bn_path = Path(bn_path).resolve()
+    bn = BooleanNetwork.from_file(str(bn_path))
     
     # Once we remove irrelevant regulations, some models become disconnected
     # and these unused variables are then problematic in further steps.
@@ -104,11 +137,11 @@ def third_task(bn_path, phenotype, perturbable):
         # Replace the previous network file (otherwise it will not be used by tsconj)
         Path(bn_path).write_text(bn.to_bnet())
 
-    print(f"[{bn_path}] Loaded {bn}.")
+    print(f"[{bn_path.name}] Loaded {bn}.")
 
     PHENOTYPE_SIZE = len(phenotype.keys())
     PERTURBABLE_VARIABLES = len(perturbable)
-    bn = BooleanNetwork.from_file(bn_path)
+    bn = BooleanNetwork.from_file(str(bn_path))
     perturbation_variables = { var: (f"pp_{var}", f"pn_{var}") for var in perturbable }
     perturbation_variable_names = sorted([ x[0] for x in perturbation_variables.values() ] + [ x[1] for x in perturbation_variables.values() ])
 
@@ -143,7 +176,7 @@ def third_task(bn_path, phenotype, perturbable):
         p_bn.set_update_function(p_var, p_var)
         p_bn.set_update_function(n_var, n_var)
 
-    print(f"[{bn_path}] Generated a network with {len(perturbation_variable_names)} new perturbation input variables.")
+    print(f"[{bn_path.name}] Generated a network with {len(perturbation_variable_names)} new perturbation input variables.")
     # For the .bnet file, we are going to use an update function which forbids knockout
     # and overexpression occuring together.
     # WARNING: This means the .bnet file is different.
@@ -157,51 +190,65 @@ def third_task(bn_path, phenotype, perturbable):
 
         p_bn.set_update_function(p_var, f'({p_var} & !{n_var})')
 
-    pert_bn = f'{bn_path.replace(".bnet", f".phen-{PHENOTYPE_SIZE}.pert-{PERTURBABLE_VARIABLES}.bnet")}' # name of pert bn
-    Path(pert_bn).write_text(p_bn.to_bnet())
+    # pert_bn = f'{bn_path.replace(".bnet", f".phen-{PHENOTYPE_SIZE}.pert-{PERTURBABLE_VARIABLES}.bnet")}' # name of pert bn
+    pert_bn = bn_path.with_name(
+        f"{bn_path.stem}.phen-{PHENOTYPE_SIZE}.pert-{PERTURBABLE_VARIABLES}.bnet"
+    )
+    pert_bn.write_text(p_bn.to_bnet(), encoding="utf-8")
 
-    spaces = list(tsconj.compute_trap_spaces(
-        pert_bn,
-        max_output=1, 
-        method="conj", 
-        computation="min",
-        write_asp_file=True,
-    ))
-    assert len(spaces) == 1
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(str(bn_path.parent))
+        spaces = list(tsconj.compute_trap_spaces(
+            str(pert_bn),
+            max_output=1, 
+            method="conj", 
+            computation="min",
+            write_asp_file=True,
+        ))
+        # assert len(spaces) == 1
 
-    # Only read the commands, not the show directives.
-    asp_commands = [ l for l in Path("query.lp").read_text().splitlines() if not l.startswith("#") ]
+        query_file = bn_path.parent / "query.lp"
 
-    for var, (p_var, n_var) in perturbation_variables.items():
-        for i in range(len(asp_commands)):
-            if asp_commands[i].startswith(f"n{p_var} :-"):
-                asp_commands[i] = f"n{p_var} :- p{n_var}, n{p_var}."
-                break # Should be just one rule of this type.
-        asp_commands.append(f"p{p_var} :- n{n_var}.")
+        # Only read the commands, not the show directives.
+        asp_commands = [
+            l for l in query_file.read_text(encoding="utf-8").splitlines()
+            if not l.startswith("#")
+        ]
 
-    # Add the phenotype restriction to the ASP query.
-    for var, value in phenotype.items():
-        if value:
-            asp_commands.append(f":- p{var}.")
-        else:
-            asp_commands.append(f":- n{var}.")
+        for var, (p_var, n_var) in perturbation_variables.items():
+            for i in range(len(asp_commands)):
+                if asp_commands[i].startswith(f"n{p_var} :-"):
+                    asp_commands[i] = f"n{p_var} :- p{n_var}, n{p_var}."
+                    break # Should be just one rule of this type.
+            asp_commands.append(f"p{p_var} :- n{n_var}.")
 
-    new_variables = sorted([ x[0] for x in perturbation_variables.values() ] + [ x[1] for x in perturbation_variables.values() ])
+        # Add the phenotype restriction to the ASP query.
+        for var, value in phenotype.items():
+            if value:
+                asp_commands.append(f":- p{var}.")
+            else:
+                asp_commands.append(f":- n{var}.")
 
-    # print(f"[{bn_path}] Saved a perturbable network with phenotype annotation.")
+        new_variables = sorted([ x[0] for x in perturbation_variables.values() ] + [ x[1] for x in perturbation_variables.values() ])
 
-    for var in new_variables:
-        # Tsconj will add a p- and n- variant of the new variables, i.e. for each perturbable
-        # variable, we have 4 ASP variables. We probably should modify this so that 2 are sufficient.
-        asp_commands.append(f"#project p{var}.")
-        asp_commands.append(f"#project n{var}.")
-        asp_commands.append(f"#show p{var}/0.")
-        asp_commands.append(f"#show n{var}/0.")
+        # print(f"[{bn_path}] Saved a perturbable network with phenotype annotation.")
 
-    # Merge and output ASP commands.
-    Path(bn_path.replace(".bnet", ".t3.mts.lp")).write_text("\n".join(asp_commands))
+        for var in new_variables:
+            # Tsconj will add a p- and n- variant of the new variables, i.e. for each perturbable
+            # variable, we have 4 ASP variables. We probably should modify this so that 2 are sufficient.
+            asp_commands.append(f"#project p{var}.")
+            asp_commands.append(f"#project n{var}.")
+            asp_commands.append(f"#show p{var}/0.")
+            asp_commands.append(f"#show n{var}/0.")
 
-    print(f"[{bn_path}] ASP file for trap spaces with phenotype restriction and controlability computed.")
+        # Merge and output ASP commands.
+        out_file = bn_path.with_suffix(".t3.mts.lp")
+        out_file.write_text("\n".join(asp_commands), encoding="utf-8")
+
+        print(f"[{bn_path.name}] ASP file for trap spaces with phenotype restriction and controlability computed.")
+    finally:
+        os.chdir(old_cwd)
 
 
 # preprocess_bn(file_path)
@@ -215,22 +262,32 @@ if int(args.t) == 3 and (args.phen == None or args.pert == None):
     print(f"Exit! task 3 requires both phenotype and perturbation")
     exit(0)
 
-with tempfile.NamedTemporaryFile(dir=".", delete=False) as f:
-    temp_file = f.name + ".bnet"
-    os.system("cp {0} {1}".format(args.bn, temp_file))
-    input_bn = os.path.basename(temp_file)
+with tempfile.NamedTemporaryFile(suffix=".bnet", delete=False) as f:
+    temp_file = Path(f.name)
+
+shutil.copy2(args.bn, temp_file)
+input_bn = str(temp_file)
 
 if int(args.t) == 1:
+    print("Executing first task")
     first_task(input_bn)
-    print(f"Executing first task")
 
-    asp_file = input_bn.replace(".bnet", ".t1.mts.lp")
-    if os.path.exists(asp_file):
-        run_approxasp(asp_file, prefix="C-MTS-1")
+    input_bn_path = Path(input_bn)
+    asp_file = input_bn_path.with_suffix(".t1.mts.lp")
+
+    if asp_file.exists():
+        run_approxasp(str(asp_file), prefix="C-MTS-1")
     else:
-        print("Error !!")
+        print(f"Error: expected file not found: {asp_file}")
 
-    os.system(f'rm -f {input_bn.replace(".bnet", "")}* query.lp')
+    base = input_bn_path.with_suffix("")
+    for file in input_bn_path.parent.glob(f"{base.name}*"):
+        if file.is_file():
+            file.unlink()
+
+    query_file = input_bn_path.parent / "query.lp"
+    if query_file.exists():
+        query_file.unlink()
 
 elif int(args.t) == 2:
     phenotype = parse_phenotype(args.phen)
@@ -239,13 +296,22 @@ elif int(args.t) == 2:
     print(f"Executing second task")
     second_task(input_bn, phenotype)
 
-    asp_file = input_bn.replace(".bnet", ".t2.mts.lp")
-    if os.path.exists(asp_file):
-        run_approxasp(asp_file, prefix="C-MTS-2")
-    else:
-        print("Error !!")
+    input_bn_path = Path(input_bn)
+    asp_file = input_bn_path.with_suffix(".t2.mts.lp")
 
-    os.system(f'rm -f {input_bn.replace(".bnet", "")}* query.lp')
+    if asp_file.exists():
+        run_approxasp(str(asp_file), prefix="C-MTS-2")
+    else:
+        print(f"Error: expected file not found: {asp_file}")
+
+    base = input_bn_path.with_suffix("")
+    for file in input_bn_path.parent.glob(f"{base.name}*"):
+        if file.is_file():
+            file.unlink()
+
+    query_file = input_bn_path.parent / "query.lp"
+    if query_file.exists():
+        query_file.unlink()
 
 elif int(args.t) == 3:
     phenotype = parse_phenotype(args.phen)
@@ -255,13 +321,18 @@ elif int(args.t) == 3:
     print(f"perturbation : {len(perturbable)} variables")
     third_task(input_bn, phenotype, perturbable)
 
-    asp_file = input_bn.replace(".bnet", ".t3.mts.lp")
-    if os.path.exists(asp_file):
-        run_approxasp(asp_file, prefix="C-MTS-3", projection=True)
-    else:
-        print("Error !!")
+    input_bn_path = Path(input_bn)
+    asp_file = input_bn_path.with_suffix(".t3.mts.lp")
 
-    os.system(f'rm -f {input_bn.replace(".bnet", "")}* query.lp')
+    # asp_file = input_bn.replace(".bnet", ".t3.mts.lp")
+    if asp_file.exists():
+        run_approxasp(str(asp_file), prefix="C-MTS-3", projection=True)
+    else:
+        print(f"Error: expected file not found: {asp_file}")
+
+    query_file = input_bn_path.parent / "query.lp"
+    if query_file.exists():
+        query_file.unlink()
 
 else:
     print(f"Exit!! task:{args.t} no such task")

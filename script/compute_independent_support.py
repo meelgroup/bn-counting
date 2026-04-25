@@ -5,6 +5,7 @@ import networkx as nx
 from networkx.algorithms.approximation import vertex_cover
 from clingo import Control
 from clingo import Function
+from pathlib import Path
 import time, os
 
 parser = argparse.ArgumentParser()
@@ -69,8 +70,12 @@ for line in open(args.i, 'r'):
 
 initial_independent_support = set()
 given_atom_set = set()
-copy_program = "copy_" + args.i.replace("grounded_", "")
-copy_program_writer = open(copy_program, 'w')
+input_file = Path(args.i).resolve()
+copy_program = input_file.parent / ("copy_" + input_file.name.replace("grounded_", ""))
+
+copy_program_writer = open(copy_program, "w", encoding="utf-8")
+# copy_program = "copy_" + args.i.replace("grounded_", "")
+# copy_program_writer = open(copy_program, 'w')
 if args.c:
     check_program = "check_" + args.i.replace("grounded_", "")
     check_program_writer = open(check_program, 'w')
@@ -217,7 +222,7 @@ def get_index(element):
 if True:
     ctl = Control(["0"])
     ctl.configuration.solve.models = 1 # check SAT or UNSAT
-    ctl.load(copy_program)
+    ctl.load(str(copy_program))
     ctl.ground([("base", [])])
 
     unknown = []
@@ -256,7 +261,11 @@ if True:
 
     print("The size of final independent support: {0}".format(len(mathcal_I) + len(unknown)))
     # printing the independent support 
-    IS_file_pointer = open("IS_" + args.i.replace("grounded_", ""), 'w')
+    input_file = Path(args.i).resolve()
+    is_file = input_file.parent / ("IS_" + input_file.name.replace("grounded_", ""))
+
+    IS_file_pointer = open(is_file, "w", encoding="utf-8")
+    # IS_file_pointer = open("IS_" + args.i.replace("grounded_", ""), 'w')
     independent_str = "c ind "
     independent_support = set()
     for is_atoms in mathcal_I:
@@ -266,7 +275,7 @@ if True:
         independent_str += "{0} ".format(mapping_of_origin_atom[un_atoms] if un_atoms in mapping_of_origin_atom else "aux")
         independent_support.add(un_atoms)
     independent_str += "0"
-    print(independent_str)
+    # print(independent_str)
     IS_file_pointer.write(independent_str)
     IS_file_pointer.close()
 

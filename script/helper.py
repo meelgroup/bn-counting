@@ -1,5 +1,11 @@
 import ast, re, shutil, os
 import subprocess as sp
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_DIR = SCRIPT_DIR.parent
+APPROXASP_BIN = SCRIPT_DIR / "approxasp"   # because build.sh currently copies it here
+IS_SCRIPT = SCRIPT_DIR / "compute_independent_support.py"
 
 
 def run(cmd, timeout, ttl = 3, silent = False):
@@ -77,37 +83,46 @@ def parse_perturbation_variables(filename):
 
     except OSError as e:
         raise ValueError(f"Could not read file {filename!r}: {e}") from e
-    
-def run_approxasp(input_asp_file, prefix = "count: ", projection = False):
-    if shutil.which("gringo"):
-    # print("Gringo Installed")
-        pass
-    else:
-        print("gringo is not installed. Please install gringo")
-        exit(1)
 
-    os.system('gringo {0} > grounded_{0}'.format(input_asp_file))
-    counting_time = 3600
-    is_time = 1200
-    # computing independet support using the grounded file
-    cmd = 'python3 compute_independent_support.py -g 1 -i grounded_{0}'.format(input_asp_file)
+def run_approxasp(input_asp_file, prefix="count: ", projection=False):
+    input_asp_file = Path(input_asp_file).resolve()
 
-    out = run(cmd, int(is_time))
-    # print(out)
+    if not shutil.which("gringo"):
+        raise RuntimeError("gringo is not installed")
 
+    grounded_file = input_asp_file.parent / f"grounded_{input_asp_file.name}"
+    is_file = input_asp_file.parent / f"IS_{input_asp_file.name}"
+
+    with grounded_file.open("w", encoding="utf-8") as f:
+        sp.run(["gringo", str(input_asp_file)], stdout=f, check=True)
+
+    sp.run(
+        ["python3", str(IS_SCRIPT), "-g", "1", "-i", str(grounded_file)],
+        text=True,
+        capture_output=True,
+    )
+
+    cmd = [
+        "timeout", "3600s",
+        str(APPROXASP_BIN),
+        "--conf", "0.35",
+        "--sparse",
+        "--useind", str(is_file),
+    ]
     if projection:
-        cmd = "timeout {0}s ./approxasp --conf 0.35 --sparse --useind IS_{1} --project=project --asp {1}".format(counting_time, input_asp_file) 
-    else:
-        cmd = "timeout {0}s ./approxasp --conf 0.35 --sparse --useind IS_{1} --asp {1}".format(counting_time, input_asp_file)
+        cmd.append("--project=project")
+    cmd += ["--asp", str(input_asp_file)]
 
-    out = run(cmd, int(counting_time))
+    result = sp.run(cmd, text=True, capture_output=True)
+
     cnt = None
-    for line in out.splitlines():
+    for line in result.stdout.splitlines():
         if line.startswith("final ApproxASP estimate") or line.startswith("The exact number of solution:"):
             cnt = line
             print(f"{prefix}: {line}")
 
     if cnt is None:
-        print("No estimate found in the ApproxASP.")
+        print("No estimate found in ApproxASP output.")
 
-    os.system(f'rm -f IS_{input_asp_file} grounded_{input_asp_file}')
+    grounded_file.unlink(missing_ok=True)
+    is_file.unlink(missing_ok=True)
