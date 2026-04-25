@@ -52,10 +52,9 @@ jobs:
 
       - name: Sample Run fixed point
         run: |
-          cd script
-          python run_fixed_point.py -t 1 -bn t1_244.bnet | tee /tmp/out.txt
+          python script/run_fixed_point.py -t 1 -bn script/t1_244.bnet | tee /tmp/out.txt
           grep -q "C-FIX-1" /tmp/out.txt
-          python run_fixed_point.py -t 2 -bn t1_244.bnet -phen phen_244.txt | tee /tmp/out.txt
+          python script/run_fixed_point.py -t 2 -bn script/t1_244.bnet -phen script/phen_244.txt | tee /tmp/out.txt
           grep -q "C-FIX-2" /tmp/out.txt
-          python run_fixed_point.py -t 3 -bn t1_244.bnet -phen phen_244.txt -pert pert_244.txt | tee /tmp/out.txt
+          python script/run_fixed_point.py -t 3 -bn script/t1_244.bnet -phen script/phen_244.txt -pert script/pert_244.txt | tee /tmp/out.txt
           grep -q "C-FIX-3" /tmp/out.txt
