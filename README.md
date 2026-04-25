@@ -37,13 +37,13 @@ chmod +x build.sh
 
 For counting minimal trap spaces:
 ```
-python3 script/run_minimal_trap_space.py -t 1 -bn script/t1_244.bnet
+python3 script/run_minimal_trap_space.py -t 1 -bn tests/t1_244.bnet
 ```
 it should print the count in line: `C-MTS-1:`
 
 For counting fixed points:
 ```
-python3 script/run_fixed_point.py -t 1 -bn script/t1_244.bnet
+python3 script/run_fixed_point.py -t 1 -bn tests/t1_244.bnet
 ```
 it should print the count in line: `C-FIX-1:`
 
@@ -54,13 +54,13 @@ it should print the count in line: `C-FIX-1:`
 
 For counting minimal trap spaces:
 ```
-python3 script/run_minimal_trap_space.py -t 2 -bn script/t1_244.bnet -phen script/phen_244.txt
+python3 script/run_minimal_trap_space.py -t 2 -bn tests/t1_244.bnet -phen tests/phen_244.txt
 ```
 it should print the count in line: `C-MTS-2:`
 
 For counting fixed points:
 ```
-python3 script/run_fixed_point.py -t 2 -bn script/t1_244.bnet -phen script/phen_244.txt
+python3 script/run_fixed_point.py -t 2 -bn tests/t1_244.bnet -phen tests/phen_244.txt
 ```
 it should print the count in line: `C-FIX-2:`
 
@@ -72,13 +72,13 @@ it should print the count in line: `C-FIX-2:`
 
 For counting minimal trap spaces:
 ```
-python3 script/run_minimal_trap_space.py -t 3 -bn script/t1_244.bnet -phen script/phen_244.txt -pert script/pert_244.txt
+python3 script/run_minimal_trap_space.py -t 3 -bn tests/t1_244.bnet -phen tests/phen_244.txt -pert tests/pert_244.txt
 ```
 it should print the count in line: `C-MTS-3:`
 
 For counting fixed points:
 ```
-python3 script/run_fixed_point.py -t 3 -bn script/t1_244.bnet -phen script/phen_244.txt -pert script/pert_244.txt
+python3 script/run_fixed_point.py -t 3 -bn tests/t1_244.bnet -phen tests/phen_244.txt -pert tests/pert_244.txt
 ```
 it should print the count in line: `C-FIX-3:`
 
